@@ -10,29 +10,39 @@ use Psr\Container\NotFoundExceptionInterface;
 
 abstract class BaseInjectorTest extends TestCase
 {
-    protected function getContainer(array $definitions = []): ContainerInterface
+    protected function getContainer(callable $dependency, array $definitions = []): ContainerInterface
     {
-        return new class($definitions) implements ContainerInterface {
-            private array $definitions;
-
-            public function __construct(array $definitions = [])
-            {
-                $this->definitions = $definitions;
-            }
-
-            public function get($id)
-            {
-                if (!$this->has($id)) {
-                    throw new class() extends \Exception implements NotFoundExceptionInterface {
-                    };
-                }
-                return $this->definitions[$id];
-            }
-
-            public function has($id)
-            {
-                return array_key_exists($id, $this->definitions);
-            }
-        };
+        return $dependency($definitions);
     }
+
+    public function containerDependencyProvider(): array {
+        return [
+            'internal' => [function (array $definitions = []) {
+                return new class($definitions) implements ContainerInterface {
+                    private array $definitions;
+
+                    public function __construct(array $definitions = [])
+                    {
+                        $this->definitions = $definitions;
+                    }
+
+                    public function get($id)
+                    {
+                        if (!$this->has($id)) {
+                            throw new class() extends \Exception implements NotFoundExceptionInterface {
+                            };
+                        }
+                        return $this->definitions[$id];
+                    }
+
+                    public function has($id)
+                    {
+                        return array_key_exists($id, $this->definitions);
+                    }
+                };
+            }]
+        ];
+    }
+
+
 }

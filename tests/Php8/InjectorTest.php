@@ -12,9 +12,13 @@ use Yiisoft\Injector\Tests\Php8\Support\TimerUnionTypes;
 
 class InjectorTest extends BaseInjectorTest
 {
-    public function testMakeInternalClass(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMakeInternalClass(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $object = (new Injector($container))->make(\SplFileObject::class, [
             'filename' => __FILE__,
@@ -27,10 +31,14 @@ class InjectorTest extends BaseInjectorTest
         $this->assertSame(basename(__FILE__), $object->getFilename());
     }
 
-    public function testInvokeUnionTypes(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testInvokeUnionTypes(callable $dependency): void
     {
         $time = new DateTimeImmutable();
-        $container = $this->getContainer([DateTimeInterface::class => $time]);
+        $container = $this->getContainer($dependency, [DateTimeInterface::class => $time]);
 
         $object = (new Injector($container))
             ->make(TimerUnionTypes::class);
