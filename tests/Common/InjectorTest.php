@@ -29,10 +29,12 @@ class InjectorTest extends BaseInjectorTest
 {
     /**
      * Injector should be able to invoke closure.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testInvokeClosure(): void
+    public function testInvokeClosure(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $getEngineName = fn (EngineInterface $engine) => $engine->getName();
 
@@ -43,10 +45,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Injector should be able to invoke array callable.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testInvokeCallableArray(): void
+    public function testInvokeCallableArray(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $object = new EngineVAZ2101();
 
@@ -57,10 +61,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Injector should be able to invoke static method.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testInvokeStatic(): void
+    public function testInvokeStatic(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $result = (new Injector($container))->invoke([EngineVAZ2101::class, 'isWroomWroom']);
 
@@ -69,10 +75,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Injector should be able to invoke static method.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testInvokeAnonymousClass(): void
+    public function testInvokeAnonymousClass(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
         $class = new class() {
             public EngineInterface $engine;
 
@@ -89,10 +97,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Injector should be able to invoke method without arguments.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testInvokeWithoutArguments(): void
+    public function testInvokeWithoutArguments(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $true = fn () => true;
 
@@ -103,10 +113,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Nullable arguments should be searched in container.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testWithNullableArgument(): void
+    public function testWithNullableArgument(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $nullable = fn (?EngineInterface $engine) => $engine;
 
@@ -117,10 +129,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Nullable arguments not found in container should be passed as `null`.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testWithNullableArgumentAndEmptyContainer(): void
+    public function testWithNullableArgumentAndEmptyContainer(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $nullable = fn (?EngineInterface $engine) => $engine;
 
@@ -131,10 +145,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Nullable scalars should be set with `null` if not specified by name explicitly.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testWithNullableScalarArgument(): void
+    public function testWithNullableScalarArgument(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $nullableInt = fn (?int $number) => $number;
 
@@ -145,10 +161,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Optional scalar arguments should be set with default value if not specified by name explicitly.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testWithNullableOptionalArgument(): void
+    public function testWithNullableOptionalArgument(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $nullableInt = fn (?int $number = 6) => $number;
 
@@ -160,10 +178,12 @@ class InjectorTest extends BaseInjectorTest
     /**
      * Optional arguments with `null` by default should be set with `null` if other value not specified in parameters
      * or container.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testWithNullableOptionalArgumentThatNull(): void
+    public function testWithNullableOptionalArgumentThatNull(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $callable = fn (EngineInterface $engine = null) => $engine;
 
@@ -174,10 +194,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * An object for a typed argument can be specified in parameters without named key and without following the order.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testCustomDependency(): void
+    public function testCustomDependency(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
         $needleEngine = new EngineZIL130();
 
         $getEngineName = fn (EngineInterface $engine) => $engine->getName();
@@ -192,10 +214,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * In this case, first argument will be set from parameters, and second argument from container.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testTwoEqualCustomArgumentsWithOneCustom(): void
+    public function testTwoEqualCustomArgumentsWithOneCustom(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $compareEngines = static function (EngineInterface $engine1, EngineInterface $engine2) {
             return $engine1->getPower() <=> $engine2->getPower();
@@ -209,10 +233,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * In this case, second argument will be set from parameters by name, and first argument from container.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testTwoEqualCustomArgumentsWithOneCustomNamedParameter(): void
+    public function testTwoEqualCustomArgumentsWithOneCustomNamedParameter(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $compareEngines = static function (EngineInterface $engine1, EngineInterface $engine2) {
             return $engine1->getPower() <=> $engine2->getPower();
@@ -227,10 +253,12 @@ class InjectorTest extends BaseInjectorTest
     /**
      * Values for arguments are not matched by the greater similarity of parameter types and arguments, but simply pass
      * in order as is.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testExtendedArgumentsWithOneCustomNamedParameter2(): void
+    public function testExtendedArgumentsWithOneCustomNamedParameter2(callable $dependency): void
     {
-        $container = $this->getContainer([LightEngine::class => new EngineVAZ2101()]);
+        $container = $this->getContainer($dependency, [LightEngine::class => new EngineVAZ2101()]);
 
         $concatEngineNames = static function (EngineInterface $engine1, LightEngine $engine2) {
             return $engine1->getName() . $engine2->getName();
@@ -244,9 +272,13 @@ class InjectorTest extends BaseInjectorTest
         $this->assertSame(EngineMarkTwo::NAME . EngineVAZ2101::NAME, $result);
     }
 
-    public function testMissingRequiredTypedParameter(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMissingRequiredTypedParameter(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $getEngineName = static function (EngineInterface $engine, string $two) {
             return $engine->getName() . $two;
@@ -258,9 +290,13 @@ class InjectorTest extends BaseInjectorTest
         $injector->invoke($getEngineName);
     }
 
-    public function testMissingRequiredNotTypedParameter(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMissingRequiredNotTypedParameter(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $getEngineName = static function (EngineInterface $engine, $two) {
             return $engine->getName() . $two;
@@ -272,9 +308,13 @@ class InjectorTest extends BaseInjectorTest
         $injector->invoke($getEngineName);
     }
 
-    public function testNotFoundException(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testNotFoundException(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $getEngineName = static function (EngineInterface $engine, ColorInterface $color) {
             return $engine->getName() . $color->getColor();
@@ -288,10 +328,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * A values collection for a variadic argument can be passed as an array in a named parameter.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testAloneScalarVariadicParameterAndNamedArrayArgument(): void
+    public function testAloneScalarVariadicParameterAndNamedArrayArgument(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $callable = fn (int ...$var) => array_sum($var);
 
@@ -300,9 +342,13 @@ class InjectorTest extends BaseInjectorTest
         $this->assertSame(6, $result);
     }
 
-    public function testAloneScalarVariadicParameterAndNamedAssocArrayArgument(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testAloneScalarVariadicParameterAndNamedAssocArrayArgument(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $callable = fn (string $foo, string ...$bar) => $foo . '--' . implode('-', $bar);
 
@@ -312,9 +358,13 @@ class InjectorTest extends BaseInjectorTest
         $this->assertSame('foo--baz-fiz', $result);
     }
 
-    public function testAloneScalarVariadicParameterAndNamedScalarArgument(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testAloneScalarVariadicParameterAndNamedScalarArgument(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $callable = fn (int ...$var) => array_sum($var);
 
@@ -326,10 +376,12 @@ class InjectorTest extends BaseInjectorTest
     /**
      * If type of a variadic argument is a class and named parameter with values collection is not set then injector
      * will search for objects by class name among all unnamed parameters.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testVariadicArgumentUnnamedParams(): void
+    public function testVariadicArgumentUnnamedParams(callable $dependency): void
     {
-        $container = $this->getContainer([DateTimeInterface::class => new DateTimeImmutable()]);
+        $container = $this->getContainer($dependency, [DateTimeInterface::class => new DateTimeImmutable()]);
 
         $callable = fn (DateTimeInterface $dateTime, EngineInterface ...$engines) => count($engines);
 
@@ -343,10 +395,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * If calling method have an untyped variadic argument then all remaining unnamed parameters will be passed.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testVariadicMixedArgumentWithMixedParams(): void
+    public function testVariadicMixedArgumentWithMixedParams(callable $dependency): void
     {
-        $container = $this->getContainer([DateTimeInterface::class => new DateTimeImmutable()]);
+        $container = $this->getContainer($dependency, [DateTimeInterface::class => new DateTimeImmutable()]);
 
         $callable = fn (...$engines) => $engines;
 
@@ -360,10 +414,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Any unnamed parameter can only be an object. Scalar, array, null and other values can only be named parameters.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testVariadicStringArgumentWithUnnamedStringsParams(): void
+    public function testVariadicStringArgumentWithUnnamedStringsParams(callable $dependency): void
     {
-        $container = $this->getContainer([DateTimeInterface::class => new DateTimeImmutable()]);
+        $container = $this->getContainer($dependency, [DateTimeInterface::class => new DateTimeImmutable()]);
 
         $callable = fn (string ...$engines) => $engines;
 
@@ -374,10 +430,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * In the absence of other values to a nullable variadic argument `null` is not passed by default.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testNullableVariadicArgument(): void
+    public function testNullableVariadicArgument(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $callable = fn (?EngineInterface ...$engines) => $engines;
 
@@ -389,10 +447,12 @@ class InjectorTest extends BaseInjectorTest
     /**
      * Parameters that were passed but were not used are appended to the call so they could be obtained
      * with func_get_args().
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testAppendingUnusedParams(): void
+    public function testAppendingUnusedParams(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $callable = static function (
             /** @scrutinizer ignore-unused */
@@ -415,10 +475,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Object type may be passed as unnamed parameter
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testInvokeWithObjectType(): void
+    public function testInvokeWithObjectType(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
         $callable = fn (object $object) => get_class($object);
 
         $result = (new Injector($container))->invoke($callable, [new DateTimeImmutable()]);
@@ -428,10 +490,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Required `object` type should not be requested from the container
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testInvokeWithRequiredObjectTypeWithoutInstance(): void
+    public function testInvokeWithRequiredObjectTypeWithoutInstance(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
         $callable = fn (object $object) => get_class($object);
 
         $this->expectException(MissingRequiredArgumentException::class);
@@ -441,10 +505,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Arguments passed by reference
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testInvokeReferencedArguments(): void
+    public function testInvokeReferencedArguments(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
         $foo = 1;
         $bar = new stdClass();
         $baz = null;
@@ -484,9 +550,13 @@ class InjectorTest extends BaseInjectorTest
         $this->assertFalse($baz);
     }
 
-    public function testInvokeReferencedAndRemovedArguments(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+    */
+    public function testInvokeReferencedAndRemovedArguments(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
         $foo = new stdClass();
         $bar = new stdClass();
         $baz = new DateTimeImmutable();
@@ -508,9 +578,13 @@ class InjectorTest extends BaseInjectorTest
         $this->assertSame(6, $result);
     }
 
-    public function testInvokeReferencedArgumentNamedVariadic(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testInvokeReferencedArgumentNamedVariadic(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $callable = static function (DateTimeInterface &...$dates) {
             $dates[0] = false;
@@ -536,10 +610,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * If argument passed by reference but it is not supported by function
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testInvokeReferencedArgument(): void
+    public function testInvokeReferencedArgument(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
         $foo = 1;
         $callable = fn (int $foo) => ++$foo;
         $result = (new Injector($container))->invoke($callable, ['foo' => &$foo]);
@@ -549,9 +625,13 @@ class InjectorTest extends BaseInjectorTest
         $this->assertSame(2, $result);
     }
 
-    public function testWrongNamedParam(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testWrongNamedParam(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $callable = fn (EngineInterface $engine) => $engine;
 
@@ -560,9 +640,13 @@ class InjectorTest extends BaseInjectorTest
         (new Injector($container))->invoke($callable, ['engine' => new DateTimeImmutable()]);
     }
 
-    public function testArrayArgumentWithUnnamedType(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testArrayArgumentWithUnnamedType(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $callable = fn (array $arg) => $arg;
 
@@ -570,10 +654,13 @@ class InjectorTest extends BaseInjectorTest
 
         (new Injector($container))->invoke($callable, [['test']]);
     }
-
-    public function testCallableArgumentWithUnnamedType(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testCallableArgumentWithUnnamedType(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $callable = fn (callable $arg) => $arg();
 
@@ -582,9 +669,13 @@ class InjectorTest extends BaseInjectorTest
         (new Injector($container))->invoke($callable, [fn () => true]);
     }
 
-    public function testIterableArgumentWithUnnamedType(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testIterableArgumentWithUnnamedType(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $callable = fn (iterable $arg) => $arg;
 
@@ -593,9 +684,13 @@ class InjectorTest extends BaseInjectorTest
         (new Injector($container))->invoke($callable, [new \SplStack()]);
     }
 
-    public function testUnnamedScalarParam(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testUnnamedScalarParam(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $getEngineName = fn () => 42;
 
@@ -604,19 +699,25 @@ class InjectorTest extends BaseInjectorTest
         (new Injector($container))->invoke($getEngineName, ['test']);
     }
 
-    public function testInvokeable(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testInvokeable(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
         $result = (new Injector($container))->invoke(new Invokeable());
         $this->assertSame(42, $result);
     }
 
     /**
      * Constructor method not defined
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testMakeWithoutConstructor(): void
+    public function testMakeWithoutConstructor(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $object = (new Injector($container))->make(MakeNoConstructor::class);
 
@@ -625,10 +726,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Constructor without arguments
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testMakeWithoutArguments(): void
+    public function testMakeWithoutArguments(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $object = (new Injector($container))->make(MakeEmptyConstructor::class);
 
@@ -637,10 +740,12 @@ class InjectorTest extends BaseInjectorTest
 
     /**
      * Private constructor unavailable from Injector context
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testMakeWithPrivateConstructor(): void
+    public function testMakeWithPrivateConstructor(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/not instantiable/');
@@ -648,10 +753,14 @@ class InjectorTest extends BaseInjectorTest
         (new Injector($container))->make(MakePrivateConstructor::class);
     }
 
-    public function testMakeInvalidClass(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMakeInvalidClass(callable $dependency): void
     {
         $undefinedClass = '\\undefinedNameSpace\\UndefinedClassThatShouldNotBeDefined';
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $this->assertFalse(class_exists($undefinedClass, true));
         $this->expectException(\ReflectionException::class);
@@ -660,33 +769,49 @@ class InjectorTest extends BaseInjectorTest
         (new Injector($container))->make($undefinedClass);
     }
 
-    public function testMakeInternalClass(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMakeInternalClass(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
         $object = (new Injector($container))->make(DateTimeImmutable::class);
         $this->assertInstanceOf(DateTimeImmutable::class, $object);
     }
 
-    public function testMakeInternalClassWithUnusedArguments(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMakeInternalClassWithUnusedArguments(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
         $object = (new Injector($container))
             ->make(DateTimeImmutable::class, ['named_param' => null, new EngineVAZ2101()]);
 
         $this->assertInstanceOf(DateTimeImmutable::class, $object);
     }
 
-    public function testMakeAbstractClass(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMakeAbstractClass(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/not instantiable/');
         (new Injector($container))->make(LightEngine::class);
     }
 
-    public function testMakeInterface(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMakeInterface(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/not instantiable/');
         (new Injector($container))->make(EngineInterface::class);
@@ -695,19 +820,25 @@ class InjectorTest extends BaseInjectorTest
     /**
      * If type of a variadic argument is a class and its value is not passed in parameters, then no arguments will be
      * passed, despite the fact that the container has a corresponding value.
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
      */
-    public function testMakeWithVariadicFromContainer(): void
+    public function testMakeWithVariadicFromContainer(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $object = (new Injector($container))->make(MakeEngineCollector::class, []);
 
         $this->assertCount(0, $object->engines);
     }
 
-    public function testMakeWithVariadicFromArguments(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMakeWithVariadicFromArguments(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $values = [new EngineMarkTwo(), new EngineVAZ2101()];
         $object = (new Injector($container))->make(MakeEngineCollector::class, $values);
@@ -715,9 +846,13 @@ class InjectorTest extends BaseInjectorTest
         $this->assertSame($values, $object->engines);
     }
 
-    public function testMakeWithCustomParam(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMakeWithCustomParam(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $object = (new Injector($container))
             ->make(MakeEngineMatherWithParam::class, [new EngineVAZ2101(), 'parameter' => 'power']);
@@ -728,9 +863,13 @@ class InjectorTest extends BaseInjectorTest
         $this->assertSame($object->parameter, 'power');
     }
 
-    public function testMakeWithInvalidCustomParam(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMakeWithInvalidCustomParam(callable $dependency): void
     {
-        $container = $this->getContainer([EngineInterface::class => new EngineMarkTwo()]);
+        $container = $this->getContainer($dependency, [EngineInterface::class => new EngineMarkTwo()]);
 
         $this->expectException(\TypeError::class);
 

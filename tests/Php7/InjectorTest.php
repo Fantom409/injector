@@ -10,9 +10,13 @@ use Yiisoft\Injector\Tests\Common\BaseInjectorTest;
 
 class InjectorTest extends BaseInjectorTest
 {
-    public function testMakeInternalClassWithOptionalMiddleArgumentSkipped(): void
+    /**
+     * @dataProvider containerDependencyProvider
+     * @param callable $dependency
+     */
+    public function testMakeInternalClassWithOptionalMiddleArgumentSkipped(callable $dependency): void
     {
-        $container = $this->getContainer();
+        $container = $this->getContainer($dependency);
 
         $this->expectException(MissingInternalArgumentException::class);
         $this->expectExceptionMessageMatches('/PHP internal/');
